@@ -1,0 +1,297 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Movies Ticket Browser</title>
+    <style>
+        .profile-nav .nav-link {
+            border-radius: 8px;
+            margin-bottom: 5px;
+            padding: 12px 20px;
+            transition: all 0.3s ease;
+        }
+        .profile-nav .nav-link.active {
+            background: #007bff;
+            color: white;
+        }
+        .profile-nav .nav-link:hover:not(.active) {
+            background: #f8f9fa;
+        }
+        .stat-card {
+            border-left: 4px solid;
+            transition: transform 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+        .booking-status-confirmed { border-left-color: #28a745; }
+        .booking-status-completed { border-left-color: #6c757d; }
+        .booking-status-cancelled { border-left-color: #dc3545; }
+        .booking-card {
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        .booking-card:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container mt-4">
+        <!-- Success/Error Messages -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div class="row">
+            <!-- Sidebar Navigation -->
+            <div class="col-lg-3 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <!-- User Info -->
+                        <div class="text-center mb-4">
+                            <div class="mb-3">
+                                <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center"
+                                     style="width: 100px; height: 100px;">
+                                    <i class="fas fa-user fa-2x text-white"></i>
+                                </div>
+                            </div>
+                            <h5 th:text="${user.name}"></h5>
+                            <p class="text-muted mb-2" th:text="${user.emailId}"></p>
+                            <span class="badge bg-primary" th:text="${user.roles}"></span>
+                        </div>
+
+                        <!-- Navigation -->
+                        <ul class="nav flex-column profile-nav">
+                            <li class="nav-item">
+                                <a class="nav-link active" href="#profile">
+                                    <i class="fas fa-user me-2"></i>Profile Details
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#bookings">
+                                    <i class="fas fa-ticket-alt me-2"></i>My Bookings
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">Booking Stats</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span>Total Bookings:</span>
+                            <strong class="text-primary" th:text="${totalBookings}">0</strong>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span>This Month:</span>
+                            <strong class="text-success" th:text="${monthlyBookings}">0</strong>
+                        </div>
+<!--                        <div class="d-flex justify-content-between align-items-center">-->
+<!--                            <span>Member Since:</span>-->
+<!--                            <strong th:text="${#temporals.year(user.createdAt)}">2023</strong>-->
+<!--                        </div>-->
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card mt-4">
+                    <div class="card-body text-center">
+                        <a th:href="@{/movies}" class="btn btn-primary w-100 mb-2">
+                            <i class="fas fa-film me-2"></i>Book Movies
+                        </a>
+                        <a th:href="@{/}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-home me-2"></i>Back to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-9">
+                <!-- Profile Details Section -->
+                <div id="profile">
+                    <!-- Page Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h2 class="fw-bold">Profile Details</h2>
+                            <p class="text-muted mb-0">Your personal information and account details</p>
+                        </div>
+                    </div>
+                    <!-- Personal Information -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="fas fa-user me-2"></i>Personal Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">Full Name</label>
+                                    <p class="fw-semibold" th:text="${user?.name} ?: 'Not available'">Not available</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">Email Address</label>
+                                    <p class="fw-semibold" th:text="${user?.emailId} ?: 'Not available'">Not available</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">Mobile Number</label>
+                                    <p class="fw-semibold" th:text="${user?.mobileNo} ?: 'Not available'">Not available</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">Age</label>
+                                    <p class="fw-semibold" th:text="${user?.age} ?: 'Not available'">Not available</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">Gender</label>
+                                    <p class="fw-semibold" th:text="${user?.gender} ?: 'Not available'">Not available</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">Role</label>
+                                    <p class="fw-semibold" th:text="${user?.roles} ?: 'Not available'">Not available</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label class="form-label text-muted">Address</label>
+                                    <p class="fw-semibold" th:text="${user?.address} ?: 'Not provided'">Not provided</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- My Bookings Section -->
+                <div id="bookings" class="mt-5">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h2 class="fw-bold">My Bookings</h2>
+                            <p class="text-muted mb-0">Your movie ticket booking history</p>
+                        </div>
+                        <a th:href="@{/movies}" class="btn btn-primary">
+                            <i class="fas fa-film me-2"></i>Book New Movie
+                        </a>
+                    </div>
+
+                    <!-- Bookings List -->
+                    <div th:if="${bookings == null or bookings.empty}" class="text-center py-5">
+                        <i class="fas fa-ticket-alt fa-4x text-muted mb-4"></i>
+                        <h4 class="text-muted">No Bookings Yet</h4>
+                        <p class="text-muted mb-4">You haven't made any bookings yet. Start by booking your first movie!</p>
+                        <a th:href="@{/movies}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-film me-2"></i>Book Your First Movie
+                        </a>
+                    </div>
+
+                    <!-- Booking Cards -->
+                    <div th:if="${bookings != null and !bookings.empty}" class="row">
+                        <div th:each="booking : ${bookings}" class="col-lg-6 mb-4">
+                            <div class="card booking-card h-100">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0" th:text="${booking.movieName}">Movie Name</h6>
+                                    <span class="badge bg-success">Confirmed</span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-12 mb-2">
+                                            <small class="text-muted">Theater</small>
+                                            <p class="mb-1 fw-semibold" th:text="${booking.theaterName}">Theater Name</p>
+                                        </div>
+                                        <div class="col-6 mb-2">
+                                            <small class="text-muted">Date & Time</small>
+                                            <p class="mb-1 fw-semibold">
+                                                <span th:text="${#temporals.format(booking.showDate, 'MMM dd')}"></span> |
+                                                <span th:text="${booking.showTime}"></span>
+                                            </p>
+                                        </div>
+                                        <div class="col-6 mb-2">
+                                            <small class="text-muted">Seats</small>
+                                            <p class="mb-1 fw-semibold" th:text="${booking.seats}"></p>
+                                        </div>
+                                        <div class="col-6 mb-2">
+                                            <small class="text-muted">Booking ID</small>
+                                            <p class="mb-1 fw-semibold" th:text="${booking.bookingId}"></p>
+                                        </div>
+                                        <div class="col-6 mb-2">
+                                            <small class="text-muted">Amount</small>
+                                            <p class="mb-1 fw-semibold text-success">₹<span th:text="${booking.totalAmount}"></span></p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-transparent">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">
+                                            Booked on <span th:text="${#temporals.format(booking.bookingDate, 'MMM dd, yyyy')}"></span>
+                                        </small>
+                                        <a th:href="@{'/ticket/download-pdf?bookingId=' + ${booking.bookingId}}"
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-download me-1"></i>Ticket
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Smooth scrolling for navigation
+        document.querySelectorAll('.profile-nav .nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+
+                    // Update active nav link
+                    document.querySelectorAll('.profile-nav .nav-link').forEach(navLink => {
+                        navLink.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                }
+            });
+        });
+
+        // Show profile section by default
+        document.getElementById('profile').style.display = 'block';
+        document.getElementById('bookings').style.display = 'block';
+    });
+</script>
+</body>
+</html>
+<!--                                &lt;!&ndash;                                <div class="col-md-6 mb-3">&ndash;&gt;-->
+<!--                                &lt;!&ndash;                                    <label class="form-label text-muted">Member Since</label>&ndash;&gt;-->
+<!--                                &lt;!&ndash;                                    <p class="fw-semibold" th:text="${#temporals.format(user.createdAt, 'MMM dd, yyyy')}"></p>&ndash;&gt;-->
+<!--                                &lt;!&ndash;                                </div>&#45;&#45;-->

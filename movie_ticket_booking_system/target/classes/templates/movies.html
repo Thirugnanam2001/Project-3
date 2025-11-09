@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout}">
+<head>
+    <title>Movies - Movies Ticket Browser</title>
+    <style>
+        /* Movie Details Modal Styles */
+.movie-poster {
+    height: 200px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.rating-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255,255,255,0.9);
+    color: #333;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-weight: bold;
+    font-size: 0.8rem;
+}
+
+.movie-card {
+    transition: all 0.3s ease;
+    border: none;
+    overflow: hidden;
+}
+
+.movie-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.info-item {
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.stat-item {
+    padding: 10px;
+}
+
+.stat-number {
+    font-size: 1.5rem;
+}
+
+.stat-label {
+    margin-top: 5px;
+}
+
+.synopsis-section {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #007bff;
+}
+
+.stars {
+    font-size: 1.2rem;
+}
+
+.rating-display {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+}
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="fw-bold">Discover Movies</h1>
+            <p class="text-muted">Find your next cinematic adventure from our curated collection</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <div class="d-flex gap-2 justify-content-md-end">
+                <button class="btn btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#filterSection">
+                    <i class="fas fa-filter me-2"></i>Filters
+                </button>
+            </div>
+        </div>
+    </div>
+
+<!--     Search and Filters -->
+    <div class="collapse show" id="filterSection">
+        <div class="filter-section mb-4">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label for="searchInput" class="form-label">Search Movies</label>
+                    <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0">
+                                <i class="fas fa-search text-muted"></i>
+                            </span>
+                        <input type="text" class="form-control border-start-0" id="searchInput"
+                               placeholder="Search by movie name...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label for="genreFilter" class="form-label">Genre</label>
+                    <select class="form-select" id="genreFilter">
+                        <option value="">All Genres</option>
+                        <option value="ACTION">Action</option>
+                        <option value="DRAMA">Drama</option>
+                        <option value="COMEDY">Comedy</option>
+                        <option value="THRILLER">Thriller</option>
+                        <option value="ROMANTIC">Romantic</option>
+                        <option value="ANIMATION">Animation</option>
+                        <option value="SPORTS">Sports</option>
+                        <option value="CRIME">Crime</option>
+                        <option value="SC-FI">SC-FI</option>
+                        <option value="War">War</option>
+                        <option value="HORROR">Horror</option>
+                        <option value="SOCIAL">Social</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="languageFilter" class="form-label">Language</label>
+                    <select class="form-select" id="languageFilter">
+                        <option value="">All Languages</option>
+                        <option value="HINDI">Hindi</option>
+                        <option value="ENGLISH">English</option>
+                        <option value="TAMIL">Tamil</option>
+                        <option value="TELUGU">Telugu</option>
+                        <option value="KANNADA">Kannada</option>
+                        <option value="MARATHI">Marathi</option>
+                        <option value="PUNJAB">Punjab</option>
+                        <option value="MALAYALAM">Malayalam</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="ratingFilter" class="form-label">Min Rating</label>
+                    <select class="form-select" id="ratingFilter">
+                        <option value="0">Any Rating</option>
+                        <option value="4.5">4.5+ Stars</option>
+                        <option value="4.0">4.0+ Stars</option>
+                        <option value="3.5">3.5+ Stars</option>
+                        <option value="3.0">3.0+ Stars</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                                <span id="resultsCount" class="text-muted">
+                                    Showing <span th:text="${movies != null ? movies.size() : 0}">0</span> movies
+                                </span>
+                        </div>
+                        <div>
+                            <button id="clearFilters" class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i>Clear Filters
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Movies Grid -->
+    <div class="row" id="moviesContainer">
+
+            <div th:each="movie : ${movies}" class="col-lg-4 col-md-6 mb-4">
+                <div class="card movie-card h-100">
+                    <div class="position-relative">
+                        <div class="movie-poster">
+                            <i class="fas fa-film fa-3x"></i>
+                        </div>
+                        <div class="rating-badge">
+                            <i class="fas fa-star text-warning me-1"></i>
+                            <span th:text="${movie.rating}">0.0</span>
+                        </div>
+                        <span class="position-absolute top-0 start-0 m-2 badge bg-success">Now Showing</span>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${movie.movieName}">Movie Title</h5>
+                        <p class="card-text text-muted small">
+                            <span th:text="${movie.genre}">Genre</span> •
+                            <span th:text="${movie.language}">Language</span> •
+                            <span th:text="${movie.duration}">0</span> mins
+                        </p>
+
+                        <div class="movie-details mb-3">
+                            <div class="row small text-muted">
+                                <div class="col-12">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    <span th:if="${movie.releaseDate != null}" th:text="${movie.releaseDate}">
+                                    Release Date
+                                </span>
+                                    <span th:if="${movie.releaseDate == null}">Coming Soon</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <span class="badge bg-primary me-1" th:text="${movie.genre}">Genre</span>
+                            <span class="badge bg-info" th:text="${movie.language}">Language</span>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <a th:href="@{'/booking?movieId=' + ${movie.id}}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-ticket-alt me-2"></i>Book Tickets
+                            </a>
+                            <button class="btn btn-outline-primary btn-sm details-btn"
+                                    th:attr="data-movie-id=${movie.id}"
+                                    data-movie-name="${movie.movieName}"
+                                    data-movie-genre="${movie.genre}"
+                                    data-movie-language="${movie.language}"
+                                    data-movie-rating="${movie.rating}"
+                                    data-movie-duration="${movie.duration}"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#movieDetailsModal"
+                                    onclick="loadMovieDetails(this)">
+                                <i class="fas fa-info-circle me-2"></i>View Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+<!--            </div>-->
+        </div>
+
+        <!-- No Movies Message -->
+        <div th:if="${movies == null || movies.empty}" class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-film fa-4x text-muted mb-3"></i>
+                <h4 class="text-muted">No Movies Available</h4>
+                <p class="text-muted">We're working on adding new movies. Please check back later.</p>
+                <div class="mt-3">
+                    <a href="/" class="btn btn-primary me-2">
+                        <i class="fas fa-home me-2"></i>Go Home
+                    </a>
+                    <a th:href="@{/admin/movies/add}" class="btn btn-outline-primary" sec:authorize="hasAuthority('ROLE_ADMIN')">
+                        <i class="fas fa-plus me-2"></i>Add Movie
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Movie Details Modal -->
+    <div class="modal fade" id="movieDetailsModal" tabindex="-1" aria-labelledby="movieDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="movieDetailsModalLabel">
+                        <i class="fas fa-film me-2"></i>Movie Details
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                 style="width: 120px; height: 120px;">
+                                <i class="fas fa-film fa-3x text-white"></i>
+                            </div>
+                            <div class="rating-display mb-3">
+                                <div class="display-4 fw-bold text-warning" id="modalMovieRating">0.0</div>
+                                <div class="stars mb-2">
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-warning"></i>
+                                </div>
+                                <small class="text-muted" id="modalVoteCount">Based on user ratings</small>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <h3 id="modalMovieTitle" class="fw-bold mb-3">Movie Title</h3>
+
+                            <div class="movie-info-grid mb-4">
+                                <div class="row g-3">
+                                    <div class="col-sm-6">
+                                        <div class="info-item">
+                                            <strong><i class="fas fa-tags me-2 text-primary"></i>Genre:</strong>
+                                            <span id="modalMovieGenre" class="ms-2">Action</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="info-item">
+                                            <strong><i class="fas fa-language me-2 text-primary"></i>Language:</strong>
+                                            <span id="modalMovieLanguage" class="ms-2">English</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="info-item">
+                                            <strong><i class="fas fa-clock me-2 text-primary"></i>Duration:</strong>
+                                            <span id="modalMovieDuration" class="ms-2">120 mins</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="info-item">
+                                            <strong><i class="fas fa-calendar me-2 text-primary"></i>Release Date:</strong>
+                                            <span id="modalMovieReleaseDate" class="ms-2">2023-12-20</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="synopsis-section mb-4">
+                                <h6 class="fw-bold mb-3">
+                                    <i class="fas fa-scroll me-2 text-primary"></i>Synopsis
+                                </h6>
+                                <p id="modalMovieSynopsis" class="text-muted">
+                                    <!-- Synopsis will be loaded here -->
+                                </p>
+                            </div>
+
+                            <div class="movie-stats">
+                                <div class="row text-center">
+                                    <div class="col-4">
+                                        <div class="stat-item">
+                                            <div class="stat-number text-primary fw-bold" id="modalAvailableShows">12</div>
+                                            <div class="stat-label small text-muted">Available Shows</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="stat-item">
+                                            <div class="stat-number text-success fw-bold" id="modalTheaterCount">8</div>
+                                            <div class="stat-label small text-muted">Partner Theaters</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="stat-item">
+                                            <div class="stat-number text-info fw-bold" id="modalBookingCount">156</div>
+                                            <div class="stat-label small text-muted">Bookings Today</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // Enhanced movie details data (you can extend this with real data from your backend)
+const movieDetailsData = {
+    1: {
+        title: "Avatar: The Way of Water",
+        genre: "ACTION",
+        language: "ENGLISH",
+        rating: 4.5,
+        duration: 192,
+        releaseDate: "2023-12-16",
+        synopsis: "Jake Sully lives with his newfound family formed on the planet of Pandora. Once a familiar threat returns to finish what was previously started, Jake must work with Neytiri and the army of the Na'vi race to protect their planet.",
+        availableShows: 15,
+        theaterCount: 12,
+        bookingCount: 234,
+        director: "James Cameron",
+        cast: ["Sam Worthington", "Zoe Saldana", "Sigourney Weaver"],
+        tags: ["Sci-Fi", "Adventure", "Epic"]
+    },
+    2: {
+        title: "Pathaan",
+        genre: "ACTION",
+        language: "HINDI",
+        rating: 4.2,
+        duration: 146,
+        releaseDate: "2023-01-25",
+        synopsis: "An Indian spy takes on the leader of a group of mercenaries who have a heinous plot for his country. A bloody battle between the two ensues.",
+        availableShows: 8,
+        theaterCount: 10,
+        bookingCount: 189,
+        director: "Siddharth Anand",
+        cast: ["Shah Rukh Khan", "Deepika Padukone", "John Abraham"],
+        tags: ["Spy", "Thriller", "Bollywood"]
+    },
+    3: {
+        title: "Kantara",
+        genre: "DRAMA",
+        language: "KANNADA",
+        rating: 4.8,
+        duration: 148,
+        releaseDate: "2022-09-30",
+        synopsis: "A human vs nature conflict in a coastal village where a young man's battle with a forest officer reveals the connection between ancient spirits and humans.",
+        availableShows: 6,
+        theaterCount: 8,
+        bookingCount: 167,
+        director: "Rishab Shetty",
+        cast: ["Rishab Shetty", "Sapthami Gowda", "Kishore Kumar G"],
+        tags: ["Mythological", "Thriller", "Cultural"]
+    },
+    4: {
+        title: "Drishyam 2",
+        genre: "THRILLER",
+        language: "HINDI",
+        rating: 4.3,
+        duration: 140,
+        releaseDate: "2022-11-18",
+        synopsis: "The Salgaonkars are living happily but their past returns to haunt them. The family must now come up with another plan to stay together and safe.",
+        availableShows: 11,
+        theaterCount: 9,
+        bookingCount: 198,
+        director: "Abhishek Pathak",
+        cast: ["Ajay Devgn", "Tabu", "Akshaye Khanna"],
+        tags: ["Mystery", "Crime", "Sequel"]
+    }
+};
+
+// Load movie details into modal
+function loadMovieDetails(button) {
+    const movieId = button.getAttribute('data-movie-id');
+    const movieData = movieDetailsData[movieId];
+
+    if (movieData) {
+        // Basic info
+        document.getElementById('modalMovieTitle').textContent = movieData.title;
+        document.getElementById('modalMovieGenre').textContent = movieData.genre;
+        document.getElementById('modalMovieLanguage').textContent = movieData.language;
+        document.getElementById('modalMovieDuration').textContent = movieData.duration + ' mins';
+        document.getElementById('modalMovieReleaseDate').textContent = formatDisplayDate(movieData.releaseDate);
+        document.getElementById('modalMovieRating').textContent = movieData.rating;
+
+        // Synopsis
+        document.getElementById('modalMovieSynopsis').textContent = movieData.synopsis;
+
+        // Stats
+        document.getElementById('modalAvailableShows').textContent = movieData.availableShows;
+        document.getElementById('modalTheaterCount').textContent = movieData.theaterCount;
+        document.getElementById('modalBookingCount').textContent = movieData.bookingCount;
+
+        // Update stars based on rating
+        updateStarRating(movieData.rating);
+
+        // Set up book tickets button
+        const bookBtn = document.getElementById('modalBookTicketsBtn');
+        bookBtn.onclick = function() {
+            window.location.href = `/booking?movieId=${movieId}`;
+        };
+    }
+}
+
+// Update star rating display
+function updateStarRating(rating) {
+    const stars = document.querySelectorAll('.stars .fas.fa-star');
+    const fullStars = Math.floor(rating);
+    const halfStar = rating % 1 >= 0.5;
+
+    stars.forEach((star, index) => {
+        if (index < fullStars) {
+            star.className = 'fas fa-star text-warning';
+        } else if (index === fullStars && halfStar) {
+            star.className = 'fas fa-star-half-alt text-warning';
+        } else {
+            star.className = 'far fa-star text-warning';
+        }
+    });
+}
+
+// Format date for display
+function formatDisplayDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+}
+
+// Simple initialization for movie filtering (keep your existing function)
+function initializeMoviesPage() {
+    console.log('Initializing movies page...');
+
+    const searchInput = document.getElementById('searchInput');
+    const genreFilter = document.getElementById('genreFilter');
+    const languageFilter = document.getElementById('languageFilter');
+    const ratingFilter = document.getElementById('ratingFilter');
+    const clearFilters = document.getElementById('clearFilters');
+
+    function filterMovies() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const genre = genreFilter.value;
+        const language = languageFilter.value;
+        const minRating = parseFloat(ratingFilter.value) || 0;
+
+        const movieCards = document.querySelectorAll('.col-lg-4.col-md-6.mb-4');
+        let visibleCount = 0;
+
+        movieCards.forEach(card => {
+            const title = card.querySelector('.card-title').textContent.toLowerCase();
+            const genreText = card.querySelector('.badge.bg-primary').textContent;
+            const languageText = card.querySelector('.badge.bg-info').textContent;
+            const rating = parseFloat(card.querySelector('.rating-badge span').textContent);
+
+            const matchesSearch = !searchTerm || title.includes(searchTerm);
+            const matchesGenre = !genre || genreText === genre;
+            const matchesLanguage = !language || languageText === language;
+            const matchesRating = !minRating || rating >= minRating;
+
+            if (matchesSearch && matchesGenre && matchesLanguage && matchesRating) {
+                card.style.display = 'block';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        // Update results count
+        const resultsCount = document.getElementById('resultsCount');
+        if (resultsCount) {
+            resultsCount.innerHTML = `Showing ${visibleCount} movies`;
+        }
+    }
+
+    // Event listeners
+    if (searchInput) searchInput.addEventListener('input', filterMovies);
+    if (genreFilter) genreFilter.addEventListener('change', filterMovies);
+    if (languageFilter) languageFilter.addEventListener('change', filterMovies);
+    if (ratingFilter) ratingFilter.addEventListener('change', filterMovies);
+
+    if (clearFilters) {
+        clearFilters.addEventListener('click', function() {
+            if (searchInput) searchInput.value = '';
+            if (genreFilter) genreFilter.value = '';
+            if (languageFilter) languageFilter.value = '';
+            if (ratingFilter) ratingFilter.value = '0';
+            filterMovies();
+        });
+    }
+
+    // Initial filter
+    filterMovies();
+}
+
+function showMovieDetailsFromButton(button) {
+    const movieName = button.getAttribute('data-movie-name');
+    const genre = button.getAttribute('data-movie-genre');
+    const language = button.getAttribute('data-movie-language');
+    const rating = button.getAttribute('data-movie-rating');
+    const duration = button.getAttribute('data-movie-duration');
+
+    showMovieDetails(movieName, genre, language, rating, duration);
+}
+
+// Keep your existing showMovieDetails function
+function showMovieDetails(title, genre, language, rating, duration) {
+    const details = `
+Movie Details:
+
+Title: ${title}
+Genre: ${genre}
+Language: ${language}
+Rating: ${rating}/5
+Duration: ${duration} minutes
+
+Full details page coming soon!
+    `;
+    alert(details);
+}
+    // Initialize when DOM is loaded
+    document.addEventListener('DOMContentLoaded', initializeMoviesPage);
+</script>
+</body>
+</html>
+
+

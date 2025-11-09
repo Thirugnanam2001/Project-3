@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Payment - Movies Ticket Browser</title>
+    <style>
+        .payment-card {
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+        .payment-card:hover {
+            transform: translateY(-2px);
+        }
+        .demo-notice {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .payment-preview {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .login-form {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+        .form-floating {
+            margin-bottom: 1rem;
+        }
+        .payment-security {
+            background: #e7f3ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container">
+        <!-- Progress Steps -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="progress-steps">
+                    <div class="step completed">
+                        <div class="step-circle">1</div>
+                        <div class="step-label">Select Theater</div>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-circle">2</div>
+                        <div class="step-label">Select Time</div>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-circle">3</div>
+                        <div class="step-label">Select Seats</div>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-circle">4</div>
+                        <div class="step-label">Review</div>
+                    </div>
+                    <div class="step active">
+                        <div class="step-circle">4</div>
+                        <div class="step-label">Review & Pay</div>
+                    </div>
+                    <div class="step active">
+                        <div class="step-circle">5</div>
+                        <div class="step-label">Ticket</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- Demo Notice -->
+                <div class="demo-notice">
+                    <h6><i class="fas fa-info-circle me-2 text-warning"></i>Demo Payment System</h6>
+                    <p class="mb-0">This is a demonstration payment system. Enter any username and password to proceed with payment.</p>
+                </div>
+
+                <!-- Error Message -->
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <!-- Booking Summary -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-ticket-alt me-2"></i>Booking Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 th:text="${movie.movieName}">Movie Title</h6>
+                                <p class="mb-1"><strong>Theater:</strong> <span th:text="${theater.name}">Theater Name</span></p>
+                                <p class="mb-1">
+                                    <strong>Date & Time:</strong>
+                                    <span th:text="${#dates.format(show.date, 'MMM dd, yyyy')}"></span> |
+                                    <span th:text="${formattedTime}">hh:mm a</span>
+                                </p>
+                                <p class="mb-0"><strong>Seats:</strong> <span th:text="${selectedSeats}">A1, A2</span></p>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <h5 class="text-primary">Total Amount: ₹<span th:text="${totalAmount}">0</span></h5>
+                                <small class="text-muted">Inclusive of all taxes</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Authentication -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-lock me-2"></i>Payment Authentication</h5>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/payment/process}" method="post" id="paymentForm">
+                            <input type="hidden" name="showId" th:value="${showId}">
+                            <input type="hidden" name="totalAmount" th:value="${totalAmount}">
+                            <input type="hidden" name="selectedSeats" th:value="${selectedSeats}">
+
+                            <div class="login-form">
+                                <h6 class="mb-4 text-center"><i class="fas fa-user-shield me-2 text-primary"></i>Enter Your Credentials</h6>
+
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username" required>
+                                    <label for="username"><i class="fas fa-user me-2"></i>Username</label>
+                                </div>
+
+                                <div class="form-floating">
+                                    <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+                                    <label for="password"><i class="fas fa-key me-2"></i>Password</label>
+                                </div>
+
+                                <div class="payment-security">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-shield-alt text-primary me-3 fa-lg"></i>
+                                        <div>
+                                            <h6 class="mb-1">Secure Payment</h6>
+                                            <small class="text-muted">Your payment is protected with bank-level security</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Quick Pay Button -->
+                            <div class="d-grid mt-4">
+                                <button type="submit" id="payNowBtn" class="btn btn-success btn-lg py-3">
+                                    <i class="fas fa-lock me-2"></i>Complete Payment - ₹<span th:text="${totalAmount}">0</span>
+                                </button>
+                            </div>
+
+                            <div class="text-center mt-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Demo: Enter any username and password to proceed
+                                </small>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Payment Information -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h6><i class="fas fa-info-circle me-2 text-info"></i>Payment Information</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-check text-success me-2"></i>100% Secure Payment</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>No Payment Gateway Charges</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-check text-success me-2"></i>Instant Confirmation</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Email & SMS Ticket</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        initializePaymentPage();
+    });
+
+    function initializePaymentPage() {
+        console.log('Initializing payment page...');
+
+        const paymentForm = document.getElementById('paymentForm');
+        const payNowBtn = document.getElementById('payNowBtn');
+
+        // Form submission handler
+        if (paymentForm) {
+            paymentForm.addEventListener('submit', function(e) {
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+
+                // Basic validation
+                if (!username || !password) {
+                    e.preventDefault();
+                    alert('Please enter both username and password to proceed with payment.');
+                    return;
+                }
+
+                // Show loading state
+                const originalText = payNowBtn.innerHTML;
+                payNowBtn.disabled = true;
+                payNowBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing Payment...';
+
+                console.log('Processing payment with credentials - Username:', username);
+
+                // Form will submit normally to server for processing
+            });
+        }
+
+        // Auto-focus on username field
+        const usernameField = document.getElementById('username');
+        if (usernameField) {
+            usernameField.focus();
+        }
+
+        // Demo credentials helper
+        console.log('Demo Payment System: Enter any username and password to proceed');
+    }
+
+    // Handle browser back button
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            // Page was loaded from cache, reset form
+            const paymentForm = document.getElementById('paymentForm');
+            if (paymentForm) {
+                paymentForm.reset();
+            }
+            const payNowBtn = document.getElementById('payNowBtn');
+            if (payNowBtn) {
+                payNowBtn.disabled = false;
+                payNowBtn.innerHTML = '<i class="fas fa-lock me-2"></i>Complete Payment - ₹' + getTotalAmount();
+            }
+        }
+    });
+
+    function getTotalAmount() {
+        // Get total amount from the span element
+        const totalAmountSpan = document.querySelector('span[th\\:text="${totalAmount}"]');
+        return totalAmountSpan ? totalAmountSpan.textContent : '0';
+    }
+</script>
+</body>
+</html>

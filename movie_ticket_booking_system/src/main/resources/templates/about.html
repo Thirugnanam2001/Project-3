@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>About Us - Movies Ticket Browser</title>
+</head>
+<body>
+<div layout:fragment="content">
+<!--    <div th:fragment="content">-->
+        <!-- Hero Section -->
+        <section class="hero-section bg-primary text-white py-5 mb-5 rounded">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-8">
+                        <h1 class="display-4 fw-bold mb-4">About Movies Ticket Browser</h1>
+                        <p class="lead mb-4">
+                            Your premier destination for seamless movie ticket booking experiences. 
+                            We're committed to bringing the magic of cinema right to your fingertips.
+                        </p>
+                    </div>
+                    <div class="col-lg-4 text-center">
+                        <i class="fas fa-film fa-10x opacity-25"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Our Story -->
+        <section class="py-5">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-6 mb-5">
+                        <h2 class="fw-bold mb-4">Our Story</h2>
+                        <p class="text-muted mb-4">
+                            Founded in 2024, Movies Ticket Browser emerged from a simple idea: 
+                            making movie ticket booking as enjoyable as watching the movie itself. 
+                            We noticed the frustrations of traditional booking systems and set out 
+                            to create something better.
+                        </p>
+                        <p class="text-muted mb-4">
+                            Today, we serve thousands of movie enthusiasts across the country, 
+                            providing a platform that combines cutting-edge technology with 
+                            user-friendly design.
+                        </p>
+                        <div class="d-flex gap-3">
+                            <div class="text-center">
+                                <h3 class="fw-bold text-primary">50K+</h3>
+                                <p class="text-muted mb-0">Happy Customers</p>
+                            </div>
+                            <div class="text-center">
+                                <h3 class="fw-bold text-success">500+</h3>
+                                <p class="text-muted mb-0">Movies Listed</p>
+                            </div>
+                            <div class="text-center">
+                                <h3 class="fw-bold text-warning">25+</h3>
+                                <p class="text-muted mb-0">Partner Theaters</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <img th:src="@{/images/cinema-about.jpg}" alt="Modern Cinema" class="img-fluid rounded shadow">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Our Mission -->
+        <section class="py-5 bg-light">
+            <div class="container">
+                <div class="row text-center mb-5">
+                    <div class="col">
+                        <h2 class="fw-bold">Our Mission & Values</h2>
+                        <p class="text-muted">What drives us every day</p>
+                    </div>
+                </div>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body text-center p-4">
+                                <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                     style="width: 80px; height: 80px;">
+                                    <i class="fas fa-bolt fa-2x text-primary"></i>
+                                </div>
+                                <h5 class="card-title">Fast & Easy</h5>
+                                <p class="card-text text-muted">
+                                    Book tickets in under 2 minutes with our streamlined process 
+                                    and intuitive interface.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body text-center p-4">
+                                <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                     style="width: 80px; height: 80px;">
+                                    <i class="fas fa-shield-alt fa-2x text-success"></i>
+                                </div>
+                                <h5 class="card-title">Secure & Reliable</h5>
+                                <p class="card-text text-muted">
+                                    Your data and payments are protected with enterprise-grade 
+                                    security measures.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body text-center p-4">
+                                <div class="bg-info bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                     style="width: 80px; height: 80px;">
+                                    <i class="fas fa-headset fa-2x text-info"></i>
+                                </div>
+                                <h5 class="card-title">24/7 Support</h5>
+                                <p class="card-text text-muted">
+                                    Our dedicated support team is always here to help you with 
+                                    any questions or issues.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Team Section -->
+        <section class="py-5">
+            <div class="container">
+                <div class="row text-center mb-5">
+                    <div class="col">
+                        <h2 class="fw-bold">Meet Our Team</h2>
+                        <p class="text-muted">The passionate people behind Movies Ticket Browser</p>
+                    </div>
+                </div>
+                <div class="row g-4 justify-content-center">
+                    <div class="col-md-4">
+                        <div class="card border-0 text-center">
+                            <div class="card-body p-4">
+                                <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                     style="width: 100px; height: 100px;">
+                                    <i class="fas fa-user fa-3x text-white"></i>
+                                </div>
+                                <h5 class="card-title">MrWise Vel</h5>
+                                <p class="text-muted mb-2">Founder & CEO</p>
+                                <p class="card-text text-muted small">
+                                    With over 10 years in the entertainment industry, 
+                                    John leads our vision and strategy.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 text-center">
+                            <div class="card-body p-4">
+                                <div class="bg-success rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                     style="width: 100px; height: 100px;">
+                                    <i class="fas fa-user fa-3x text-white"></i>
+                                </div>
+                                <h5 class="card-title">Thiru Gnanam</h5>
+                                <p class="text-muted mb-2">CTO</p>
+                                <p class="card-text text-muted small">
+                                    Sarah oversees our technology stack and ensures 
+                                    smooth platform performance.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 text-center">
+                            <div class="card-body p-4">
+                                <div class="bg-warning rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                                     style="width: 100px; height: 100px;">
+                                    <i class="fas fa-user fa-3x text-white"></i>
+                                </div>
+                                <h5 class="card-title">Thiru Gnanam</h5>
+                                <p class="text-muted mb-2">Head of Operations</p>
+                                <p class="card-text text-muted small">
+                                    Mike manages our theater partnerships and customer 
+                                    experience initiatives.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="py-5 bg-dark text-white rounded">
+            <div class="container text-center">
+                <h2 class="fw-bold mb-3">Ready to Book Your Next Movie?</h2>
+                <p class="lead mb-4">Join thousands of satisfied customers and experience cinema like never before.</p>
+                <div class="d-flex gap-3 justify-content-center">
+                    <a href="/movies" class="btn btn-primary btn-lg">
+                        <i class="fas fa-film me-2"></i>Browse Movies
+                    </a>
+                    <a href="/register" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-user-plus me-2"></i>Sign Up Free
+                    </a>
+                </div>
+            </div>
+        </section>
+<!--    </div>-->
+</div>
+</body>
+</html>

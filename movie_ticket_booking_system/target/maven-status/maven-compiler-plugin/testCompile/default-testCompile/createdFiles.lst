@@ -1,0 +1,16 @@
+com\jts\movie_ticket_booking_system\controllers\ShowControllerTest.class
+com\jts\movie_ticket_booking_system\controllers\MovieControllerTest.class
+com\jts\movie_ticket_booking_system\services\PaymentServiceTest.class
+com\jts\movie_ticket_booking_system\services\ShowServiceTest.class
+com\jts\movie_ticket_booking_system\repository\ShowRepositoryTest.class
+com\jts\movie_ticket_booking_system\repository\UserRepositoryTest.class
+com\jts\movie_ticket_booking_system\services\UserServiceTest.class
+com\jts\movie_ticket_booking_system\controllers\AuthControllerTest.class
+com\jts\movie_ticket_booking_system\repository\TicketRepositoryTest.class
+com\jts\movie_ticket_booking_system\services\MovieServiceTest.class
+com\jts\movie_ticket_booking_system\controllers\AdminControllerTest.class
+com\jts\movie_ticket_booking_system\services\TicketServiceTest.class
+com\jts\movie_ticket_booking_system\repository\TheaterRepositoryTest.class
+com\jts\movie_ticket_booking_system\controllers\BookingControllerTest.class
+com\jts\movie_ticket_booking_system\repository\MovieRepositoryTest.class
+com\jts\movie_ticket_booking_system\MovieTicketBookingSystemApplicationTests.class

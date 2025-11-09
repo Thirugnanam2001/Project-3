@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Review Booking - Movies Ticket Browser</title>
+    <style>
+        .booking-summary-card {
+            border-left: 4px solid #007bff;
+        }
+        .price-breakdown {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        .seat-badge {
+            font-size: 14px;
+            padding: 8px 12px;
+            margin: 2px;
+        }
+        .action-buttons {
+            position: sticky;
+            bottom: 0;
+            background: white;
+            padding: 20px 0;
+            border-top: 1px solid #e9ecef;
+            margin-top: 30px;
+        }
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            margin: 40px 0;
+            position: relative;
+        }
+        .progress-steps::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #e9ecef;
+            z-index: 1;
+        }
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+        .step-circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #e9ecef;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 8px;
+            border: 3px solid white;
+        }
+        .step.active .step-circle {
+            background: #007bff;
+            color: white;
+        }
+        .step.completed .step-circle {
+            background: #28a745;
+            color: white;
+        }
+        .step-label {
+            font-size: 12px;
+            color: #6c757d;
+            text-align: center;
+        }
+        .step.active .step-label {
+            color: #007bff;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body th:with="formattedTime=${@timeFormatter.formatTimeForDisplay(show.time)}"
+      data-show-id="${show.id}"
+      data-movie-id="${show.movie.id}"
+      data-theater-id="${show.theater.id}">
+<div layout:fragment="content">
+    <div class="container">
+        <!-- Progress Steps -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="progress-steps">
+                    <div class="step completed">
+                        <div class="step-circle">1</div>
+                        <div class="step-label">Select Theater</div>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-circle">2</div>
+                        <div class="step-label">Select Time</div>
+                    </div>
+                    <div class="step completed">
+                        <div class="step-circle">3</div>
+                        <div class="step-label">Select Seats</div>
+                    </div>
+                    <div class="step active">
+                        <div class="step-circle">4</div>
+                        <div class="step-label">Review & Pay</div>
+                    </div>
+                    <div class="step active">
+                        <div class="step-circle">5</div>
+                        <div class="step-label">Ticket</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card booking-summary-card mb-4">
+                    <div class="card-header bg-light">
+                        <h4 class="mb-0"><i class="fas fa-clipboard-check me-2 text-primary"></i>Booking Summary</h4>
+                    </div>
+                    <div class="card-body">
+                        <!-- Movie Information -->
+                        <div class="row mb-4">
+                            <div class="col-md-8">
+                                <h3 th:text="${show.movie.movieName}" class="text-primary"></h3>
+                                <p class="text-muted mb-2">
+                                    <span th:text="${show.movie.genre}"></span> •
+                                    <span th:text="${show.movie.language}"></span> •
+                                    <span th:text="${show.movie.duration + ' mins'}"></span>
+                                </p>
+                                <div class="rating">
+                                    <i class="fas fa-star text-warning"></i>
+                                    <span th:text="${show.movie.rating}"></span>/5
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center"
+                                     style="width: 80px; height: 80px;">
+                                    <i class="fas fa-film fa-2x text-white"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- Show Details -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-building me-2 text-muted"></i>Theater Details</h6>
+                                <p class="mb-1"><strong th:text="${show.theater.name}"></strong></p>
+                                <p class="text-muted small mb-0" th:text="${show.theater.address}"></p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-calendar-alt me-2 text-muted"></i>Show Timing</h6>
+                                <p class="mb-1">
+                                    <strong th:text="${#dates.format(show.date, 'EEEE, MMMM dd, yyyy')}"></strong>
+                                </p>
+                                <p class="text-muted mb-0">
+                                    <i class="fas fa-clock me-1"></i>
+                                    <span th:text="${formattedTime}"></span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- Selected Seats -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6><i class="fas fa-chair me-2 text-muted"></i>Selected Seats</h6>
+                                <div class="selected-seats mt-2">
+                                    <th:block th:each="seat : ${selectedSeats}">
+                                        <span class="badge seat-badge"
+                                              th:class="${#strings.startsWith(seat, '1') || #strings.startsWith(seat, '2')} ? 'bg-warning text-dark' : 'bg-primary'">
+                                            <i class="fas fa-chair me-1"></i>
+                                            <span th:text="${seat}"></span>
+                                            <small th:text="${(#strings.startsWith(seat, '1') || #strings.startsWith(seat, '2')) ? ' (Premium)' : ' (Classic)'}"></small>
+                                        </span>
+                                    </th:block>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- Price Breakdown -->
+                        <div class="row">
+                            <div class="col-12">
+                                <h6><i class="fas fa-receipt me-2 text-muted"></i>Price Breakdown</h6>
+                                <div class="price-breakdown mt-3">
+                                    <th:block th:with="
+                                        classicSeats=${#lists.size(selectedSeats.?[#strings.startsWith(#this, '1') == false && #strings.startsWith(#this, '2') == false])},
+                                        premiumSeats=${#lists.size(selectedSeats.?[#strings.startsWith(#this, '1') || #strings.startsWith(#this, '2')])},
+                                        classicPrice=200,
+                                        premiumPrice=350,
+                                        classicTotal=${classicSeats * classicPrice},
+                                        premiumTotal=${premiumSeats * premiumPrice}">
+
+                                        <div class="row" th:if="${classicSeats > 0}">
+                                            <div class="col-6">
+                                                <p class="mb-1">Classic Seats (<span th:text="${classicSeats}"></span> × ₹<span th:text="${classicPrice}"></span>)</p>
+                                            </div>
+                                            <div class="col-6 text-end">
+                                                <p class="mb-1">₹<span th:text="${classicTotal}"></span></p>
+                                            </div>
+                                        </div>
+
+                                        <div class="row" th:if="${premiumSeats > 0}">
+                                            <div class="col-6">
+                                                <p class="mb-1">Premium Seats (<span th:text="${premiumSeats}"></span> × ₹<span th:text="${premiumPrice}"></span>)</p>
+                                            </div>
+                                            <div class="col-6 text-end">
+                                                <p class="mb-1">₹<span th:text="${premiumTotal}"></span></p>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mt-2 pt-2 border-top">
+                                            <div class="col-6">
+                                                <h6 class="mb-0">Total Amount</h6>
+                                            </div>
+                                            <div class="col-6 text-end">
+                                                <h5 class="text-primary mb-0">₹<span th:text="${totalAmount}"></span></h5>
+                                            </div>
+                                        </div>
+                                    </th:block>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Important Information -->
+                <div class="card border-warning">
+                    <div class="card-header bg-warning text-dark">
+                        <h6 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Important Information</h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                Please arrive at the theater at least 30 minutes before the show
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                Carry a valid ID proof for verification
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                Tickets are non-refundable and non-transferable
+                            </li>
+                            <li class="mb-0">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                Children below 3 years are allowed free of charge
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <br><br>
+
+            <div class="col-lg-4">
+                <!-- Customer Support -->
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-headset me-2"></i>Need Help?</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center">
+                            <i class="fas fa-phone-alt fa-2x text-primary mb-3"></i>
+                            <h6>Customer Support</h6>
+                            <p class="text-muted small mb-2">Available 24/7</p>
+                            <p class="mb-2">
+                                <strong>📞 +91-7604848659</strong>
+                            </p>
+                            <p class="mb-0">
+                                <strong>✉️ gnanamdon2001@gmail.com</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <div class="row">
+                <div class="col-6 text-end">
+                    <form th:action="@{/booking/payment}" method="post" id="reviewForm">
+                        <input type="hidden" name="showId" th:value="${show.id}">
+                        <th:block th:each="seat : ${selectedSeats}">
+                            <input type="hidden" name="selectedSeats" th:value="${seat}">
+                        </th:block>
+                        <input type="hidden" name="totalAmount" th:value="${totalAmount}">
+                        <button type="submit" class="btn btn-success btn-lg" id="proceedToPaymentBtn">
+                            <i class="fas fa-lock me-2"></i>Proceed to Payment
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Navigation functions
+    function goBackToSeats() {
+        const showId = [[${show.id}]];
+        window.location.href = `/booking/seats?showId=${showId}`;
+    }
+
+    function goBackToShowtimes() {
+        const movieId = [[${show.movie.id}]];
+        const theaterId = [[${show.theater.id}]];
+        window.location.href = `/booking/showtime?movieId=${movieId}&theaterId=${theaterId}`;
+    }
+
+    function goBackToTheater() {
+        const movieId = [[${show.movie.id}]];
+        window.location.href = `/booking/theater?movieId=${movieId}`;
+    }
+
+    // Initialize when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        // Setup navigation buttons
+        document.querySelectorAll('.back-to-seats').forEach(btn => {
+            btn.addEventListener('click', goBackToSeats);
+        });
+
+        document.querySelectorAll('.back-to-showtimes').forEach(btn => {
+            btn.addEventListener('click', goBackToShowtimes);
+        });
+
+        document.querySelectorAll('.back-to-theater').forEach(btn => {
+            btn.addEventListener('click', goBackToTheater);
+        });
+
+        // Add confirmation before proceeding to payment
+        const paymentForm = document.getElementById('reviewForm');
+        if (paymentForm) {
+            paymentForm.addEventListener('submit', function(e) {
+                const confirmed = confirm('Are you sure you want to proceed with the payment?\n\nTotal Amount: ₹' +
+                    [[${totalAmount}]]);
+
+                if (!confirmed) {
+                    e.preventDefault();
+                    return false;
+                }
+
+                // Show loading state
+                const submitBtn = document.getElementById('proceedToPaymentBtn');
+                if (submitBtn) {
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+                    submitBtn.disabled = true;
+
+                    // Restore button after 5 seconds if still on page (fallback)
+                    setTimeout(() => {
+                        if (submitBtn.disabled) {
+                            submitBtn.innerHTML = originalText;
+                            submitBtn.disabled = false;
+                        }
+                    }, 5000);
+                }
+
+                return true;
+            });
+        }
+    });
+</script>
+</body>
+</html>

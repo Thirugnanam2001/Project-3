@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Select Show Time - Movies Ticket Browser</title>
+    <style>
+        .time-slot {
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+        .time-slot:hover {
+            border-color: #007bff;
+            background-color: #f8f9fa;
+        }
+        .time-slot.selected {
+            border-color: #007bff;
+            background-color: #007bff;
+            color: white;
+        }
+        .time-slot.disabled {
+            background-color: #f8f9fa;
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            margin: 40px 0;
+            position: relative;
+        }
+        .progress-steps::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #e9ecef;
+            z-index: 1;
+        }
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+        .step-circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #e9ecef;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 8px;
+            border: 3px solid white;
+        }
+        .step.active .step-circle {
+            background: #007bff;
+            color: white;
+        }
+        .step.completed .step-circle {
+            background: #28a745;
+            color: white;
+        }
+        .step-label {
+            font-size: 12px;
+            color: #6c757d;
+            text-align: center;
+        }
+        .step.active .step-label {
+            color: #007bff;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body th:attr="data-movie-id=${movie.id}, data-theater-id=${theater.id}">
+<div layout:fragment="content">
+    <div class="container">
+        <!-- Progress Steps -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="progress-steps">
+                    <div class="step completed">
+                        <div class="step-circle">1</div>
+                        <div class="step-label">Select Theater</div>
+                    </div>
+                    <div class="step active">
+                        <div class="step-circle">2</div>
+                        <div class="step-label">Select Time</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-circle">3</div>
+                        <div class="step-label">Select Seats</div>
+                    </div>
+                    <div class="step active">
+                        <div class="step-circle">4</div>
+                        <div class="step-label">Review & Pay</div>
+                    </div>
+                    <div class="step active">
+                        <div class="step-circle">5</div>
+                        <div class="step-label">Ticket</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <h2>Select Show Time</h2>
+                <div class="booking-info mb-4">
+                    <h5 th:text="${movie.movieName}"></h5>
+                    <p class="text-muted mb-1" th:text="${theater.name}"></p>
+                    <p class="text-muted" th:text="${theater.address}"></p>
+                </div>
+
+                <div class="date-selector mb-4">
+                    <label class="form-label">Select Date</label>
+                    <input type="date" class="form-control" id="datePicker">
+                </div>
+
+                <div class="show-times" id="showTimesContainer">
+                    <div th:each="show : ${shows}" class="time-slot"
+                         th:attr="data-show-id=${show.id}, data-date=${#dates.format(show.date, 'yyyy-MM-dd')}">
+                        <div class="time" th:text="${timeFormatter.formatTime(show.time)}"></div>
+                        <!--                        <div class="time" th:text="${formatTime(show.time)}"></div>-->
+                        <div class="screen" th:text="'Screen ' + ${show.id}"></div>
+                        <small class="text-muted" th:text="${#dates.format(show.date, 'MMM dd')}"></small>
+                    </div>
+                </div>
+
+                <div th:if="${shows == null || shows.empty}" class="text-center py-5">
+                    <i class="fas fa-clock fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">No Shows Available</h4>
+                    <p class="text-muted">No show times found for this movie and theater combination.</p>
+                    <a th:href="@{/booking/theater(movieId=${movie.id})}" class="btn btn-primary">Back to Theaters</a>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">Booking Summary</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="movie-info mb-3">
+                            <h6 th:text="${movie.movieName}"></h6>
+                            <small class="text-muted">
+                                <span th:text="${movie.genre}"></span> •
+                                <span th:text="${movie.language}"></span>
+                            </small>
+                        </div>
+                        <div class="theater-info mb-3">
+                            <small><strong>Theater:</strong> <span th:text="${theater.name}"></span></small>
+                        </div>
+                        <div class="selected-show" id="selectedShowInfo" style="display: none;">
+                            <hr>
+                            <h6>Selected Show</h6>
+                            <p id="selectedShowTime" class="mb-1 small"></p>
+                            <p id="selectedShowDate" class="text-muted small"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12 text-end">
+                <button id="continueBtn" class="btn btn-primary btn-lg" disabled>
+                    Continue to Seats <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<script layout:fragment="scripts">
+    // This will run after the main script.js is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Theater selection page loaded');
+        // TheaterSelection is already initialized by the main script.js
+        // because it detects the #theatersList element
+    });
+<!-- No inline JavaScript - everything is handled in script.js -->
+</script>
+</body>
+</html>
